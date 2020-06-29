@@ -6,6 +6,8 @@ use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Duration;
 use substrate_test_client::ClientBlockImportExt;
+use polkadot_service::PolkadotClient;
+use sc_block_builder::BlockBuilderProvider;
 
 static INTEGRATION_TEST_ALLOWED_TIME: Option<&str> = option_env!("INTEGRATION_TEST_ALLOWED_TIME");
 
@@ -44,7 +46,9 @@ async fn ensure_test_service_build_blocks() {
 		)
 		.unwrap();
 
-		alice.client.import((), ()).unwrap(); // TODO
+		//let mut builder = alice.client.new_block(Default::default()).unwrap();
+		//let block = builder.build().unwrap().block;
+		//alice.client.import(block).unwrap(); // TODO
 
 		let t1 = future::join(alice.wait_for_blocks(3), bob.wait_for_blocks(3)).fuse();
 		let t2 = alice.service.fuse();

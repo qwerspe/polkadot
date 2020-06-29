@@ -126,6 +126,13 @@ pub fn node_config<P: AsRef<Path>>(
 
 	network_config.transport = TransportConfig::MemoryOnly;
 
+	use std::net::{SocketAddr, Ipv4Addr};
+	let rpc_http = Some(SocketAddr::new(
+		Ipv4Addr::LOCALHOST.into(),
+		27015,
+	));
+	let rpc_methods = service::config::RpcMethods::Unsafe;
+
 	Ok(Configuration {
 		impl_name: "polkadot-test-node",
 		impl_version: "0.1",
@@ -153,11 +160,11 @@ pub fn node_config<P: AsRef<Path>>(
 			offchain_worker: sc_client_api::ExecutionStrategy::NativeWhenPossible,
 			other: sc_client_api::ExecutionStrategy::NativeWhenPossible,
 		},
-		rpc_http: None,
+		rpc_http,
 		rpc_ws: None,
 		rpc_ws_max_connections: None,
 		rpc_cors: None,
-		rpc_methods: Default::default(),
+		rpc_methods,
 		prometheus_config: None,
 		telemetry_endpoints: None,
 		telemetry_external_transport: None,

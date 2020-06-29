@@ -22,6 +22,7 @@ use sp_blockchain::HeaderBackend;
 use sp_runtime::traits::Block as BlockT;
 use sc_block_builder::BlockBuilderProvider;
 use sc_client_api::{Backend as BackendT, BlockchainEvents, TransactionFor};
+//use substrate_test_client::ClientBlockImportExt;
 
 /// Polkadot client abstraction, this super trait only pulls in functionality required for
 /// polkadot internal crates like polkadot-collator.
@@ -40,7 +41,18 @@ pub trait PolkadotClient<Block, Backend, Runtime>:
 		Block: BlockT,
 		Backend: BackendT<Block>,
 		Runtime: ConstructRuntimeApi<Block, Self>,
-{}
+{
+	fn import(&mut self, block: Block) -> Result<(), consensus_common::Error> {
+		let origin = consensus_common::BlockOrigin::Own;
+		let (header, extrinsics) = block.deconstruct();
+		let mut import = consensus_common::BlockImportParams::new(origin, header);
+		import.body = Some(extrinsics);
+		import.fork_choice = Some(consensus_common::ForkChoiceStrategy::LongestChain);
+		self.import_block(import, std::collections::HashMap::new())?;
+
+		Ok(())
+	}
+}
 
 impl<Block, Backend, Runtime, Client> PolkadotClient<Block, Backend, Runtime> for Client
 	where
