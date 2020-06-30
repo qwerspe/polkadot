@@ -8,6 +8,7 @@ use std::time::Duration;
 use substrate_test_client::ClientBlockImportExt;
 use polkadot_service::PolkadotClient;
 use sc_block_builder::BlockBuilderProvider;
+use consensus_common::block_import::BlockImport;
 
 static INTEGRATION_TEST_ALLOWED_TIME: Option<&str> = option_env!("INTEGRATION_TEST_ALLOWED_TIME");
 
@@ -30,7 +31,7 @@ async fn ensure_test_service_build_blocks() {
 	))
 	.fuse();
 	let t2 = async {
-		let alice = run_test_node(
+		let mut alice = run_test_node(
 			task_executor(),
 			Sr25519Keyring::Alice,
 			|| {},

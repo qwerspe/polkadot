@@ -22,6 +22,7 @@ use service_new::{IdentifyVariant, self as service};
 use sc_executor::NativeExecutionDispatch;
 use sc_cli::{SubstrateCli, Result};
 use crate::cli::{Cli, Subcommand};
+use polkadot_test_service::IdentifyVariant as _;
 
 fn get_exec_name() -> Option<String> {
 	std::env::current_exe()
@@ -66,6 +67,7 @@ impl SubstrateCli for Cli {
 			"westend-dev" => Box::new(service::chain_spec::westend_development_config()),
 			"westend-local" => Box::new(service::chain_spec::westend_local_testnet_config()),
 			"westend-staging" => Box::new(service::chain_spec::westend_staging_testnet_config()),
+			"test" => Box::new(polkadot_test_service::polkadot_local_testnet_config()),
 			path if self.run.force_kusama => {
 				Box::new(service::KusamaChainSpec::from_json_file(std::path::PathBuf::from(path))?)
 			},
@@ -150,6 +152,19 @@ pub fn run() -> Result<()> {
 						).map(|(s, _, _)| s)
 					},
 					service::WestendExecutor::native_version().runtime_version
+				)
+			} else if chain_spec.is_test() {
+				runtime.run_full_node(
+					|config| {
+						polkadot_test_service::polkadot_test_new_full(
+							config,
+							None,
+							None,
+							authority_discovery_enabled,
+							6000,
+						).map(|(s, _, _)| s)
+					},
+					polkadot_test_service::PolkadotTestExecutor::native_version().runtime_version
 				)
 			} else {
 				runtime.run_node(
