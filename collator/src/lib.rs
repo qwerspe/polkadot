@@ -82,6 +82,7 @@ use polkadot_service_new::{
 	Error as ServiceError, FullNodeHandles, PolkadotClient,
 };
 use polkadot_test_service::IdentifyVariant as _;
+use log::error;
 
 const COLLATION_TIMEOUT: Duration = Duration::from_secs(30);
 
@@ -285,6 +286,7 @@ fn build_collator_service<SP, P, C, R, Extrinsic>(
 	handles.validation_service_handle
 		.ok_or_else(|| "Collator cannot run when validation networking has not been started")?;
 
+	error!("======= 4");
 	let parachain_context = match build_parachain_context.build(
 		client.clone(),
 		spawner,
@@ -295,6 +297,7 @@ fn build_collator_service<SP, P, C, R, Extrinsic>(
 			return Err("Could not build the parachain context!".into())
 		}
 	};
+	error!("======= 5");
 
 	let work = async move {
 		let mut notification_stream = client.import_notification_stream();
@@ -319,7 +322,9 @@ fn build_collator_service<SP, P, C, R, Extrinsic>(
 			let key = key.clone();
 			let parachain_context = parachain_context.clone();
 
+			error!("======= 6");
 			let work = future::lazy(move |_| {
+				error!("======= 7");
 				let api = client.runtime_api();
 				let global_validation = try_fr!(api.global_validation_schedule(&id));
 				let local_validation = match try_fr!(api.local_validation_data(&id, para_id)) {
@@ -363,10 +368,13 @@ fn build_collator_service<SP, P, C, R, Extrinsic>(
 
 			let future = silenced.map(drop);
 
+			error!("======= 8");
 			tokio::spawn(future);
+			error!("======= 9");
 		}
 	}.boxed();
 
+	error!("======= 10");
 	Ok(work)
 }
 
@@ -384,11 +392,13 @@ where
 	P::ParachainContext: Send + 'static,
 	<P::ParachainContext as ParachainContext>::ProduceCandidate: Send,
 {
+	error!("======= 1");
 	if matches!(config.role, Role::Light) {
 		return Err(
 			polkadot_service::Error::Other("light nodes are unsupported as collator".into())
 		.into());
 	}
+	error!("======= 2");
 
 	if config.chain_spec.is_kusama() {
 		let (service, client, handlers) = service::kusama_new_full(
@@ -429,6 +439,7 @@ where
 			build_parachain_context
 		)?.await;
 	} else if config.chain_spec.is_test() {
+		error!("======= 3");
 		let (service, client, handlers) = polkadot_test_service::polkadot_test_new_full(
 			config,
 			Some((key.public(), para_id)),
@@ -446,6 +457,7 @@ where
 			build_parachain_context
 		)?.await;
 	} else {
+		error!("======= 3 alt");
 		let (service, client, handles) = service::polkadot_new_full(
 			config,
 			Some((key.public(), para_id)),
