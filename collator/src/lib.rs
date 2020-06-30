@@ -398,7 +398,7 @@ where
 			polkadot_service::Error::Other("light nodes are unsupported as collator".into())
 		.into());
 	}
-	error!("======= 2");
+	error!("======= 2 {:?}", config.chain_spec.id());
 
 	if config.chain_spec.is_kusama() {
 		let (service, client, handlers) = service::kusama_new_full(
