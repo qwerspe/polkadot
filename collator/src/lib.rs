@@ -289,7 +289,7 @@ fn build_collator_service<SP, P, C, R, Extrinsic>(
 	error!("======= 4");
 	let parachain_context = match build_parachain_context.build(
 		client.clone(),
-		spawner,
+		spawner.clone(),
 		polkadot_network.clone(),
 	) {
 		Ok(ctx) => ctx,
@@ -369,7 +369,8 @@ fn build_collator_service<SP, P, C, R, Extrinsic>(
 			let future = silenced.map(drop);
 
 			error!("======= 8");
-			tokio::spawn(future);
+			//tokio::spawn(future);
+			spawner.spawn_obj(Box::new(future).into()).expect("could not spawn task");
 			error!("======= 9");
 		}
 	}.boxed();
